@@ -1,0 +1,39 @@
+version: '3.3'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - dwh_network
+
+  spark:
+    image: jupyter/all-spark-notebook
+    container_name: spark
+    ports:
+      - "8888:8888"
+    environment:
+      - SPARK_DRIVER_MEMORY=2G
+      - SPARK_EXECUTOR_MEMORY=4G
+    networks:
+      - dwh_network
+    volumes:
+      - ./notebooks:/home/jovyan/work
+    command:
+      - start-notebook.sh
+
+volumes:
+  pgdata:
+
+networks:
+  dwh_network:
+    driver: bridge
